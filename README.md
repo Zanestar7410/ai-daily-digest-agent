@@ -6,14 +6,14 @@ An agent-assisted reporting pipeline that discovers high-signal AI updates, norm
 
 ## Why this project
 
-This project was built as a practical AI intelligence workflow rather than a generic news crawler.
+This project is designed as a reporting-oriented AI intelligence workflow with explicit source governance and structured output.
 
 - It separates information discovery from document rendering through a structured JSON contract.
 - It supports two execution modes:
   - `Codex automation mode` for day-to-day local use without local API credentials.
   - `OpenAI API mode` for portable, fully self-contained reproduction and showcase purposes.
-- It enforces source policy instead of unrestricted crawling.
-- It produces an auditable PDF artifact instead of an ephemeral chat response.
+- It applies explicit source-governance rules to keep discovery scope controlled and auditable.
+- It produces auditable PDF reports suitable for review, archival, and recurring reporting workflows.
 
 ## What it does
 
@@ -53,7 +53,7 @@ Current categories:
 
 ### 1. Render mode
 
-Default local mode. The project reads a structured JSON file produced by automation and renders the PDF.
+Default local mode. The project reads a structured JSON file produced by automation and renders the PDF. This mode does not require `OPENAI_API_KEY`.
 
 ```powershell
 .\scripts\run_digest.ps1 --input input\latest_digest.json
@@ -69,7 +69,7 @@ Install the optional dependency first:
 .venv\Scripts\python -m pip install -e .[dev,api]
 ```
 
-Set `OPENAI_API_KEY` before running API mode.
+Set `OPENAI_API_KEY` before running API mode. This requirement applies only to `API mode`, not to the default local rendering workflow.
 
 Run:
 

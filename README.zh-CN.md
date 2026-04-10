@@ -2,18 +2,18 @@
 
 [English](./README.md)
 
-一个面向 AI 情报整理的 agent 化日报流水线：先发现高价值资讯，再写入结构化 JSON，最后渲染为 LaTeX/PDF 日报。
+一个面向 AI 情报整理与日报生产的 agent 化流水线：先完成高价值信息发现与结构化整理，再生成 LaTeX/PDF 日报。
 
 ## 项目定位
 
-本项目是一个可审计的 AI 情报生产系统。
+该项目定位为一个可审计的 AI 情报生产系统，采用结构化输出与来源治理机制，适用于持续性的情报跟踪与报告生成。
 
 - 通过结构化 JSON 契约，将“信息发现”和“文档渲染”解耦
 - 同时支持两种运行方式：
   - `Codex automation mode`：日常本地使用，不依赖本地 API key
   - `OpenAI API mode`：用于展示与独立复现的可选模式
-- 通过来源策略控制信息边界，而不是无约束全网抓取
-- 输出正式 PDF 日报，而不是一次性的聊天结果
+- 通过来源策略约束信息边界，确保发现流程可控、可审计
+- 输出正式 PDF 日报，适用于归档、复核与持续跟踪
 
 ## 核心能力
 
@@ -53,7 +53,7 @@ flowchart LR
 
 ### 1. Render mode
 
-默认本地模式。读取 automation 生成的结构化 JSON，然后渲染 PDF。
+默认本地模式。读取 automation 生成的结构化 JSON，然后渲染 PDF。该模式不需要 `OPENAI_API_KEY`。
 
 ```powershell
 .\scripts\run_digest.ps1 --input input\latest_digest.json
@@ -61,7 +61,7 @@ flowchart LR
 
 ### 2. API mode
 
-可选展示模式。通过 `GPT-5.4 + web_search` 走 OpenAI API，先生成 digest JSON，再渲染 PDF。
+可选展示模式。通过 `GPT-5.4 + web_search` 调用 OpenAI API，先生成 digest JSON，再渲染 PDF。
 
 先安装可选依赖：
 
@@ -69,7 +69,7 @@ flowchart LR
 .venv\Scripts\python -m pip install -e .[dev,api]
 ```
 
-运行前需要设置 `OPENAI_API_KEY`。
+运行前需要设置 `OPENAI_API_KEY`。该要求仅适用于 `API mode`，不影响默认本地渲染流程。
 
 运行：
 

@@ -7,7 +7,7 @@ The repository is organized around a two-stage workflow:
 1. `Discovery and summarization`
 2. `Structured rendering and archival`
 
-The two stages are connected by a structured JSON contract rather than by direct coupling.
+The two stages are connected through a structured JSON contract, which keeps the workflow modular and auditable.
 
 ## Modes
 
@@ -84,4 +84,4 @@ Maintains local SQLite state for:
 - Discovery and rendering are decoupled for auditability and operational flexibility.
 - Codex automation mode keeps local daily usage simple.
 - API mode keeps the repository portable and self-contained for demonstration.
-- PDF output makes the system suitable for reporting and archival workflows rather than one-off chat output.
+- PDF output makes the system suitable for recurring reporting, review, and archival workflows.
