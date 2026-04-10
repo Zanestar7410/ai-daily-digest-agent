@@ -1,0 +1,65 @@
+[
+  {
+    "id": "openai_news",
+    "name": "OpenAI News",
+    "tier": 0,
+    "domains": ["openai.com"],
+    "query_hint": "OpenAI official news, product updates, research, safety, and developer announcements"
+  },
+  {
+    "id": "anthropic_claude_blog",
+    "name": "Anthropic Claude Blog",
+    "tier": 0,
+    "domains": ["claude.com", "anthropic.com"],
+    "query_hint": "Anthropic official Claude blog, API updates, model releases, and safety announcements"
+  },
+  {
+    "id": "google_ai_blog",
+    "name": "Google AI",
+    "tier": 0,
+    "domains": ["blog.google", "deepmind.google"],
+    "query_hint": "Google AI, Gemini, and DeepMind official posts"
+  },
+  {
+    "id": "meta_ai_blog",
+    "name": "Meta AI Blog",
+    "tier": 0,
+    "domains": ["ai.meta.com"],
+    "query_hint": "Meta AI official research and product updates"
+  },
+  {
+    "id": "hugging_face_blog",
+    "name": "Hugging Face Blog",
+    "tier": 0,
+    "domains": ["huggingface.co"],
+    "query_hint": "Hugging Face official model, platform, and research updates"
+  },
+  {
+    "id": "microsoft_ai_blog",
+    "name": "Microsoft AI Blog",
+    "tier": 0,
+    "domains": ["news.microsoft.com", "blogs.microsoft.com"],
+    "query_hint": "Microsoft official AI and Copilot announcements"
+  },
+  {
+    "id": "nature_machine_learning",
+    "name": "Nature Machine Learning",
+    "tier": 1,
+    "domains": ["nature.com"],
+    "query_hint": "Nature machine learning latest research and news"
+  },
+  {
+    "id": "mit_technology_review_ai",
+    "name": "MIT Technology Review AI",
+    "tier": 2,
+    "domains": ["technologyreview.com"],
+    "query_hint": "MIT Technology Review artificial intelligence coverage"
+  },
+  {
+    "id": "github_community_ai",
+    "name": "GitHub Community AI",
+    "tier": 2,
+    "domains": ["github.com"],
+    "query_hint": "High-signal GitHub AI community posts, discussions, issues, and repositories with strong community engagement"
+  }
+]

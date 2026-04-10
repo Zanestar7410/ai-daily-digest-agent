@@ -1,0 +1,16 @@
+{
+  "digest_time": "2026-04-05T10:30:00+02:00",
+  "entries": [
+    {
+      "source_id": "openai_news",
+      "source_name": "OpenAI News",
+      "source_tier": 0,
+      "title": "OpenAI updates safety guidance",
+      "url": "https://openai.com/news/safety-guidance/",
+      "published_at": "2026-04-04T09:00:00+00:00",
+      "summary": "Chinese summary placeholder.",
+      "is_backfill": false,
+      "excerpt": "Optional English excerpt."
+    }
+  ]
+}
