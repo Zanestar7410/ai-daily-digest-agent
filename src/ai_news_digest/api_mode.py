@@ -42,7 +42,7 @@ class OpenAIWebSearchCollector:
         *,
         client: OpenAI | None = None,
         model: str = "gpt-5.4",
-        reasoning_effort: str = "high",
+        reasoning_effort: str = "medium",
         search_context_size: str = "high",
     ) -> None:
         if client is not None:
@@ -128,7 +128,7 @@ class OpenAISummarizer:
         *,
         client: OpenAI | None = None,
         model: str = "gpt-5.4",
-        reasoning_effort: str = "high",
+        reasoning_effort: str = "medium",
     ) -> None:
         if client is not None:
             self.client = client
@@ -187,13 +187,21 @@ def build_api_digest_document(
     summarizer: OpenAISummarizer,
     storage: DigestStorage,
     digest_time: datetime,
+    dry_run: bool = False,
     json_output_path: Path | None = None,
 ) -> DigestDocument:
-    storage.initialize()
     fetched_items = collector.collect_items(sources=sources, digest_time=digest_time)
-    storage.upsert_items(fetched_items)
-    candidates = storage.list_unselected_items()
-    selected = select_digest_items(candidates=candidates, digest_time=digest_time)
+    selected_urls = storage.list_selected_urls()
+    selected = select_digest_items(
+        candidates=fetched_items,
+        digest_time=digest_time,
+        already_selected_urls=selected_urls,
+    )
+
+    if not dry_run:
+        storage.initialize()
+        storage.upsert_items(fetched_items)
+
     summary_map = summarizer.summarize_items([item.item for item in selected])
 
     entries = [

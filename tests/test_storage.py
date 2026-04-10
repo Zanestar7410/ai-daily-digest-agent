@@ -41,6 +41,21 @@ def test_storage_tracks_previously_selected_items(tmp_path: Path) -> None:
         digest_date=datetime(2026, 4, 1, 10, 30, tzinfo=UTC),
         pdf_path="output/2026-04-01.pdf",
     )
-    storage.record_digest_entries(run_id, [(item, "中文摘要", False)])
+    storage.record_digest_entries(run_id, [(item, "summary", False)])
 
     assert storage.list_unselected_items() == []
+
+
+def test_storage_lists_selected_urls(tmp_path: Path) -> None:
+    storage = DigestStorage(tmp_path / "digest.sqlite3")
+    storage.initialize()
+    item = build_item("https://blog.google/item-3", datetime(2026, 3, 30, tzinfo=UTC))
+    storage.upsert_items([item])
+
+    run_id = storage.create_digest_run(
+        digest_date=datetime(2026, 4, 1, 10, 30, tzinfo=UTC),
+        pdf_path="output/2026-04-01.pdf",
+    )
+    storage.record_digest_entries(run_id, [(item, "summary", False)])
+
+    assert storage.list_selected_urls() == {"https://blog.google/item-3"}

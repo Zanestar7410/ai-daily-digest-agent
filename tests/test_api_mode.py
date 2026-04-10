@@ -31,7 +31,7 @@ class FakeClient:
         self.responses = FakeResponses(parsed_objects)
 
 
-def test_web_search_collector_uses_high_reasoning() -> None:
+def test_web_search_collector_uses_medium_reasoning() -> None:
     source = SearchSourceConfig(
         id="openai_news",
         name="OpenAI News",
@@ -62,18 +62,18 @@ def test_web_search_collector_uses_high_reasoning() -> None:
 
     assert items[0].title == "OpenAI updates safety guidance"
     request = client.responses.calls[0]
-    assert request["reasoning"] == {"effort": "high"}
+    assert request["reasoning"] == {"effort": "medium"}
     assert request["tools"][0]["type"] == "web_search"
 
 
-def test_summarizer_uses_high_reasoning() -> None:
+def test_summarizer_uses_medium_reasoning() -> None:
     client = FakeClient(
         [
             BatchSummary(
                 entries=[
                     SummaryEntry(
                         url="https://openai.com/news/safety-guidance/",
-                        summary="中文摘要",
+                        summary="summary",
                     )
                 ]
             )
@@ -92,12 +92,12 @@ def test_summarizer_uses_high_reasoning() -> None:
 
     result = summarizer.summarize_items([item])
 
-    assert result["https://openai.com/news/safety-guidance/"] == "中文摘要"
+    assert result["https://openai.com/news/safety-guidance/"] == "summary"
     request = client.responses.calls[0]
-    assert request["reasoning"] == {"effort": "high"}
+    assert request["reasoning"] == {"effort": "medium"}
 
 
-def test_build_api_digest_document_and_save_json(tmp_path: Path) -> None:
+def test_build_api_digest_document_dry_run_does_not_persist_state(tmp_path: Path) -> None:
     source = SearchSourceConfig(
         id="openai_news",
         name="OpenAI News",
@@ -108,8 +108,6 @@ def test_build_api_digest_document_and_save_json(tmp_path: Path) -> None:
 
     class FakeCollector:
         def collect_items(self, *, sources, digest_time, lookback_days: int = 14):
-            from ai_news_digest.models import SourceItem
-
             return [
                 SourceItem(
                     source_id="openai_news",
@@ -124,7 +122,7 @@ def test_build_api_digest_document_and_save_json(tmp_path: Path) -> None:
 
     class FakeSummarizer:
         def summarize_items(self, items):
-            return {"https://openai.com/news/safety-guidance/": "中文摘要"}
+            return {"https://openai.com/news/safety-guidance/": "summary"}
 
     json_path = tmp_path / "latest_digest.json"
     document = build_api_digest_document(
@@ -133,12 +131,14 @@ def test_build_api_digest_document_and_save_json(tmp_path: Path) -> None:
         summarizer=FakeSummarizer(),
         storage=DigestStorage(tmp_path / "state" / "digest.sqlite3"),
         digest_time=datetime(2026, 4, 5, 10, 30, tzinfo=UTC),
+        dry_run=True,
         json_output_path=json_path,
     )
 
     assert len(document.entries) == 1
     assert json_path.exists()
-    assert "中文摘要" in json_path.read_text(encoding="utf-8")
+    assert "summary" in json_path.read_text(encoding="utf-8")
+    assert not (tmp_path / "state" / "digest.sqlite3").exists()
 
     other = tmp_path / "saved.json"
     save_digest_document(document=document, path=other)

@@ -20,7 +20,7 @@ def test_render_pipeline_writes_tex_in_dry_run(tmp_path: Path) -> None:
                     published_at=datetime(2026, 4, 4, 9, 0, tzinfo=UTC),
                     excerpt="Official summary.",
                 ),
-                summary="中文摘要一",
+                summary="summary one",
                 is_backfill=False,
             )
         ],
@@ -34,4 +34,5 @@ def test_render_pipeline_writes_tex_in_dry_run(tmp_path: Path) -> None:
 
     assert result.selected_count == 1
     assert result.pdf_path is None
-    assert "中文摘要一" in result.tex_path.read_text(encoding="utf-8")
+    assert "summary one" in result.tex_path.read_text(encoding="utf-8")
+    assert not (tmp_path / "state" / "digest.sqlite3").exists()

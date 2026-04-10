@@ -109,6 +109,16 @@ class DigestStorage:
             for row in rows
         ]
 
+    def list_selected_urls(self) -> set[str]:
+        if not self.database_path.exists():
+            return set()
+
+        with sqlite3.connect(self.database_path) as connection:
+            rows = connection.execute(
+                "SELECT DISTINCT item_url FROM digest_entries"
+            ).fetchall()
+        return {row[0] for row in rows}
+
     def create_digest_run(self, *, digest_date: datetime, pdf_path: str) -> int:
         with sqlite3.connect(self.database_path) as connection:
             cursor = connection.execute(

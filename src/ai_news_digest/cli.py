@@ -39,6 +39,7 @@ def main() -> int:
             summarizer=OpenAISummarizer(),
             storage=DigestStorage(Path(args.state_dir) / "digest.sqlite3"),
             digest_time=resolve_digest_time_from_path(input_path),
+            dry_run=args.dry_run,
             json_output_path=input_path,
         )
     else:
