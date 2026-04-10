@@ -2,7 +2,7 @@
 
 [中文说明](./README.zh-CN.md)
 
-An agent-assisted reporting pipeline that discovers high-signal AI updates, normalizes them into a structured digest JSON, and renders a daily LaTeX PDF report.
+An agent-assisted reporting pipeline that discovers high-signal AI updates, normalizes them into a structured digest JSON, and renders a daily LaTeX PDF report. The project supports both a Codex-automation workflow and an optional OpenAI API workflow using `GPT-5.4` plus `web_search`.
 
 ## Why this project
 
@@ -115,6 +115,7 @@ For the showcase API path:
 
 - Agent workflow design with clear tool and state boundaries
 - Dual-mode execution strategy for both daily use and portable reproduction
+- Optional `OPENAI_API_KEY` execution path for API-driven discovery and summarization
 - Structured intermediate representation between discovery and rendering
 - Deterministic document generation with LaTeX and PDF compilation
 - Test-covered local pipeline with SQLite-backed run state

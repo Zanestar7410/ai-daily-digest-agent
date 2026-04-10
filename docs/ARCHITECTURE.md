@@ -25,6 +25,7 @@ This is the default day-to-day workflow.
 This is the showcase and portable reproduction workflow.
 
 - The local Python project uses `GPT-5.4` plus the `web_search` tool
+- It can be executed with `OPENAI_API_KEY` when an API-backed workflow is required
 - It writes the digest JSON to disk
 - It renders the final PDF locally
 

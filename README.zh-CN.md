@@ -2,7 +2,7 @@
 
 [English](./README.md)
 
-一个面向 AI 情报整理与日报生产的 agent 化流水线：先完成高价值信息发现与结构化整理，再生成 LaTeX/PDF 日报。
+一个面向 AI 情报整理与日报生产的 agent 化流水线：先完成高价值信息发现与结构化整理，再生成 LaTeX/PDF 日报。项目同时支持 `Codex automation` 工作流，以及可选的 `OPENAI_API_KEY + GPT-5.4 + web_search` API 工作流。
 
 ## 项目定位
 
@@ -115,6 +115,7 @@ python -m venv .venv
 
 - 清晰的 agent workflow 设计与工具边界
 - 同时支持“日常自动化使用”和“可移植独立复现”的双模式
+- 提供可选的 `OPENAI_API_KEY` 驱动 API 路径，用于搜索发现与摘要生成
 - 用结构化中间表示连接搜索发现与文档渲染
 - 通过 LaTeX 生成可复用、可归档的正式 PDF 产物
 - 具备 SQLite 状态持久化与测试覆盖
