@@ -4,11 +4,12 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from ai_news_digest.models import DigestDocument, DigestDocumentEntry, SearchSourceConfig, SourceItem
 from ai_news_digest.selection import select_digest_items
 from ai_news_digest.storage import DigestStorage
+from ai_news_digest.topics import TOPIC_TAXONOMY
 
 try:
     from openai import OpenAI
@@ -30,6 +31,11 @@ class SearchBatch(BaseModel):
 class SummaryEntry(BaseModel):
     url: str
     summary: str
+    topics: list[str] = Field(default_factory=list)
+    entities: list[str] = Field(default_factory=list)
+    event_type: str = ""
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    why_it_matters: str = ""
 
 
 class BatchSummary(BaseModel):
@@ -61,6 +67,40 @@ class OpenAIWebSearchCollector:
         sources: list[SearchSourceConfig],
         digest_time: datetime,
         lookback_days: int = 14,
+    ) -> list[SourceItem]:
+        return self._search_sources(
+            sources=sources,
+            digest_time=digest_time,
+            lookback_days=lookback_days,
+            query=None,
+        )
+
+    def search_latest_items(
+        self,
+        *,
+        query: str,
+        sources: list[SearchSourceConfig],
+        digest_time: datetime,
+        limit: int = 10,
+        lookback_days: int = 14,
+    ) -> list[SourceItem]:
+        items = self._search_sources(
+            sources=sources,
+            digest_time=digest_time,
+            lookback_days=lookback_days,
+            query=query,
+        )
+        filtered = [item for item in items if item.published_at <= digest_time]
+        filtered.sort(key=lambda item: item.published_at.timestamp(), reverse=True)
+        return filtered[:limit]
+
+    def _search_sources(
+        self,
+        *,
+        sources: list[SearchSourceConfig],
+        digest_time: datetime,
+        lookback_days: int,
+        query: str | None,
     ) -> list[SourceItem]:
         items: list[SourceItem] = []
         seen_urls: set[str] = set()
@@ -95,6 +135,11 @@ class OpenAIWebSearchCollector:
                                 f"Source label: {source.name}",
                                 f"Allowed domains: {', '.join(source.domains)}",
                                 f"Search focus: {source.query_hint}",
+                                *(
+                                    [f"Search query: {query}"]
+                                    if query is not None
+                                    else []
+                                ),
                                 "Find recent AI-related updates and return up to 5 items.",
                                 "Each item must include title, canonical URL, publication timestamp, and a short English excerpt.",
                             ]
@@ -139,7 +184,7 @@ class OpenAISummarizer:
         self.model = model
         self.reasoning_effort = reasoning_effort
 
-    def summarize_items(self, items: list[SourceItem]) -> dict[str, str]:
+    def summarize_items(self, items: list[SourceItem]) -> dict[str, SummaryEntry]:
         if not items:
             return {}
 
@@ -149,11 +194,14 @@ class OpenAISummarizer:
             input=[
                 {
                     "role": "system",
-                    "content": (
-                        "Write concise Chinese summaries for an AI daily digest. "
-                        "Be factual and specific. Do not use hype."
-                    ),
-                },
+                        "content": (
+                            "Write concise Chinese summaries for an AI daily digest. "
+                            "Be factual and specific. Do not use hype. "
+                            f"Assign 1-3 topics from this controlled taxonomy only: {', '.join(TOPIC_TAXONOMY)}. "
+                            "Also extract 1-5 concrete entities, an event_type in short kebab-case, "
+                            "a confidence score between 0 and 1, and one short why_it_matters sentence."
+                        ),
+                    },
                 {
                     "role": "user",
                     "content": "\n\n".join(
@@ -173,7 +221,7 @@ class OpenAISummarizer:
             text_format=BatchSummary,
         )
         parsed: BatchSummary = response.output_parsed
-        summary_map = {entry.url: entry.summary for entry in parsed.entries}
+        summary_map = {entry.url: entry for entry in parsed.entries}
         missing = [item.url for item in items if item.url not in summary_map]
         if missing:
             raise ValueError(f"Missing summaries for URLs: {', '.join(missing)}")
@@ -212,9 +260,14 @@ def build_api_digest_document(
             title=selected_item.item.title,
             url=selected_item.item.url,
             published_at=selected_item.item.published_at,
-            summary=summary_map[selected_item.item.url],
+            summary=summary_map[selected_item.item.url].summary,
             is_backfill=selected_item.is_backfill,
             excerpt=selected_item.item.excerpt,
+            topics=summary_map[selected_item.item.url].topics,
+            entities=summary_map[selected_item.item.url].entities,
+            event_type=summary_map[selected_item.item.url].event_type,
+            confidence=summary_map[selected_item.item.url].confidence,
+            why_it_matters=summary_map[selected_item.item.url].why_it_matters,
         ).to_digest_entry()
         for selected_item in selected
     ]
@@ -240,6 +293,11 @@ def save_digest_document(*, document: DigestDocument, path: Path) -> None:
                 "summary": entry.summary,
                 "is_backfill": entry.is_backfill,
                 "excerpt": entry.item.excerpt,
+                "topics": entry.item.topics,
+                "entities": entry.item.entities,
+                "event_type": entry.item.event_type,
+                "confidence": entry.item.confidence,
+                "why_it_matters": entry.item.why_it_matters,
             }
             for entry in document.entries
         ],

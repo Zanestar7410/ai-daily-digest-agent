@@ -28,7 +28,12 @@ def escape_latex(value: str) -> str:
     return "".join(LATEX_ESCAPE.get(char, char) for char in value)
 
 
-def render_digest_tex(*, digest_time: datetime, entries: list[DigestEntry]) -> str:
+def render_digest_tex(
+    *,
+    digest_time: datetime,
+    entries: list[DigestEntry],
+    report_title: str = "AI Daily Digest",
+) -> str:
     template = TEMPLATE_PATH.read_text(encoding="utf-8")
     entry_blocks: list[str] = []
     for index, entry in enumerate(entries, start=1):
@@ -48,7 +53,8 @@ def render_digest_tex(*, digest_time: datetime, entries: list[DigestEntry]) -> s
         )
 
     return (
-        template.replace("{{RUN_DATE}}", digest_time.date().isoformat())
+        template.replace("{{REPORT_TITLE}}", escape_latex(report_title))
+        .replace("{{RUN_DATE}}", digest_time.date().isoformat())
         .replace("{{ENTRY_COUNT}}", str(len(entries)))
         .replace("{{ENTRIES}}", "\n\n".join(entry_blocks))
     )

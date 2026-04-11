@@ -16,8 +16,13 @@ def test_load_digest_document_from_json(tmp_path: Path) -> None:
       "title": "OpenAI updates safety guidance",
       "url": "https://openai.com/news/safety-guidance/",
       "published_at": "2026-04-04T09:00:00+00:00",
-      "summary": "中文摘要一",
-      "is_backfill": false
+      "summary": "Chinese summary placeholder.",
+      "is_backfill": false,
+      "topics": ["safety-governance"],
+      "entities": ["OpenAI"],
+      "event_type": "policy-update",
+      "confidence": 0.91,
+      "why_it_matters": "This affects enterprise rollout decisions."
     }
   ]
 }
@@ -27,7 +32,16 @@ def test_load_digest_document_from_json(tmp_path: Path) -> None:
 
     document = load_digest_document(path)
 
-    assert document.digest_time == datetime(2026, 4, 5, 10, 30, tzinfo=datetime.fromisoformat("2026-04-05T10:30:00+02:00").tzinfo)
+    expected_tz = datetime.fromisoformat("2026-04-05T10:30:00+02:00").tzinfo
+    assert document.digest_time == datetime(2026, 4, 5, 10, 30, tzinfo=expected_tz)
     assert len(document.entries) == 1
-    assert document.entries[0].summary == "中文摘要一"
+    assert document.entries[0].summary == "Chinese summary placeholder."
     assert document.entries[0].item.published_at == datetime(2026, 4, 4, 9, 0, tzinfo=UTC)
+    assert document.entries[0].item.topics == ["safety-governance"]
+    assert document.entries[0].item.entities == ["OpenAI"]
+    assert document.entries[0].item.event_type == "policy-update"
+    assert document.entries[0].item.confidence == 0.91
+    assert (
+        document.entries[0].item.why_it_matters
+        == "This affects enterprise rollout decisions."
+    )

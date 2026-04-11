@@ -36,6 +36,11 @@ class SourceItem(BaseModel):
     url: str
     published_at: datetime
     excerpt: str = ""
+    topics: list[str] = Field(default_factory=list)
+    entities: list[str] = Field(default_factory=list)
+    event_type: str = ""
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    why_it_matters: str = ""
 
     def with_timezone(self) -> "SourceItem":
         if self.published_at.tzinfo is None:
@@ -64,6 +69,11 @@ class DigestDocumentEntry(BaseModel):
     summary: str
     is_backfill: bool = False
     excerpt: str = ""
+    topics: list[str] = Field(default_factory=list)
+    entities: list[str] = Field(default_factory=list)
+    event_type: str = ""
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    why_it_matters: str = ""
 
     def to_digest_entry(self) -> DigestEntry:
         return DigestEntry(
@@ -75,6 +85,11 @@ class DigestDocumentEntry(BaseModel):
                 url=self.url,
                 published_at=self.published_at,
                 excerpt=self.excerpt,
+                topics=self.topics,
+                entities=self.entities,
+                event_type=self.event_type,
+                confidence=self.confidence,
+                why_it_matters=self.why_it_matters,
             ).with_timezone(),
             summary=self.summary,
             is_backfill=self.is_backfill,
@@ -84,3 +99,28 @@ class DigestDocumentEntry(BaseModel):
 class DigestDocument(BaseModel):
     digest_time: datetime
     entries: list[DigestEntry]
+
+
+class HistoricalSearchMatch(BaseModel):
+    item: SourceItem
+    summary: str | None = None
+    report_date: datetime | None = None
+    report_kind: str | None = None
+    report_topic: str | None = None
+    report_path: str | None = None
+
+
+class EventRecord(BaseModel):
+    event_id: str
+    title: str
+    summary: str
+    event_type: str = ""
+    source_name: str
+    source_tier: int = Field(ge=0)
+    published_at: datetime
+    url: str
+    topics: list[str] = Field(default_factory=list)
+    entities: list[str] = Field(default_factory=list)
+    excerpt: str = ""
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    why_it_matters: str = ""

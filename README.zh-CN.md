@@ -2,86 +2,32 @@
 
 [English](./README.md)
 
-一个面向 AI 情报整理与日报生产的 agent 化流水线：先完成高价值信息发现与结构化整理，再生成 LaTeX/PDF 日报。项目同时支持 `Codex automation` 工作流，以及可选的 `OPENAI_API_KEY + GPT-5.4 + web_search` API 工作流。
+一个面向 AI 资讯、事件提取与研究报告生成的本地情报工作台。
 
-## 项目定位
+## 项目概览
 
-该项目定位为一个可审计的 AI 情报生产系统，采用结构化输出与来源治理机制，适用于持续性的情报跟踪与报告生成。
+本项目为一个 AI 日报生成的小型情报系统，具备以下能力：
 
-- 通过结构化 JSON 契约，将“信息发现”和“文档渲染”解耦
-- 同时支持两种运行方式：
-  - `Codex automation mode`：日常本地使用，不依赖本地 API key
-  - `OpenAI API mode`：用于展示与独立复现的可选模式
-- 通过来源策略约束信息边界，确保发现流程可控、可审计
-- 输出正式 PDF 日报，适用于归档、复核与持续跟踪
+- 受控来源发现
+- 结构化事件提取
+- 历史检索
+- 实体与主题跟踪
+- 研究报告持久化
+- 本地接口与展示面板
 
 ## 核心能力
 
-1. 从可信来源范围发现近期 AI 更新
-2. 严格筛选 `3-5` 条高价值内容
-3. 当当天内容不足时，允许向前回补 `14` 天
-4. 生成简洁中文摘要
-5. 输出结构化 digest JSON
-6. 渲染并编译 LaTeX PDF 日报
+- 从可信来源发现近期 AI 更新
+- 自动筛选高价值条目并支持回补
+- 生成中文摘要与结构化事件元数据
+- 将条目、事件、日报运行记录、研究报告持久化到 SQLite
+- 支持历史内容、事件、实体、主题与研究报告检索
+- 支持基于持久化事件的研究模式，并可选实时增强
+- 支持 LaTeX / PDF 日报与主题报告输出
 
-## 架构
+## 快速开始
 
-```mermaid
-flowchart LR
-    A["可信来源策略\nconfig/search_sources.json"] --> B["信息发现层"]
-    B --> C["结构化 Digest JSON\ninput/latest_digest.json"]
-    C --> D["校验与持久化\nSQLite"]
-    D --> E["LaTeX 渲染"]
-    E --> F["PDF 输出"]
-
-    B1["Codex Automation\n内置网络搜索"] --> B
-    B2["可选 OpenAI API 模式\nGPT-5.4 + web_search"] --> B
-```
-
-## 来源范围
-
-来源策略定义在 [config/search_sources.json](./config/search_sources.json)。
-
-当前范围包括：
-
-- 官方渠道
-- 权威机构
-- 高质量媒体
-- 高信号 GitHub 社区帖子
-
-## 运行模式
-
-### 1. Render mode
-
-默认本地模式。读取 automation 生成的结构化 JSON，然后渲染 PDF。该模式不需要 `OPENAI_API_KEY`。
-
-```powershell
-.\scripts\run_digest.ps1 --input input\latest_digest.json
-```
-
-### 2. API mode
-
-可选展示模式。通过 `GPT-5.4 + web_search` 调用 OpenAI API，先生成 digest JSON，再渲染 PDF。
-
-先安装可选依赖：
-
-```powershell
-.venv\Scripts\python -m pip install -e .[dev,api]
-```
-
-运行前需要设置 `OPENAI_API_KEY`。该要求仅适用于 `API mode`，不影响默认本地渲染流程。
-
-运行：
-
-```powershell
-.venv\Scripts\python -m ai_news_digest --mode api --input input\latest_digest.json
-```
-
-## 示例输入
-
-参考 [input/latest_digest.example.json](./input/latest_digest.example.json)。
-
-## 本地安装
+创建虚拟环境并安装基础依赖：
 
 ```powershell
 python -m venv .venv
@@ -89,11 +35,100 @@ python -m venv .venv
 .venv\Scripts\python -m pip install -e .[dev]
 ```
 
-如果要使用展示型 API 路径：
+如果需要 OpenAI API 路径：
 
 ```powershell
 .venv\Scripts\python -m pip install -e .[dev,api]
 ```
+
+## 常用命令
+
+渲染已有 digest：
+
+```powershell
+.\scripts\run_digest.ps1 --input input\latest_digest.json
+```
+
+通过 OpenAI API 生成 digest：
+
+```powershell
+.venv\Scripts\python -m ai_news_digest --mode api --input input\latest_digest.json
+```
+
+生成主题报告：
+
+```powershell
+.venv\Scripts\python -m ai_news_digest --mode api --write-topic-reports
+```
+
+检索历史内容：
+
+```powershell
+.venv\Scripts\python -m ai_news_digest --history-query "agent" --source "OpenAI News" --entity "Responses API" --date-from 2026-04-01 --date-to 2026-04-10
+```
+
+检索事件：
+
+```powershell
+.venv\Scripts\python -m ai_news_digest --event-query "agent" --event-type product-release --entity "OpenAI" --sort-by confidence --limit 10
+```
+
+查看实体时间线：
+
+```powershell
+.venv\Scripts\python -m ai_news_digest --entity-timeline "OpenAI" --limit 10
+```
+
+运行研究模式：
+
+```powershell
+.venv\Scripts\python -m ai_news_digest --research-query "最近两周 OpenAI agent 相关变化" --limit 8
+```
+
+输出研究报告到 Markdown，并启用实时增强：
+
+```powershell
+.venv\Scripts\python -m ai_news_digest --research-query "最近两周 OpenAI agent 相关变化" --research-live --research-output output\research.md --limit 8
+```
+
+回填旧事件记录：
+
+```powershell
+.venv\Scripts\python -m ai_news_digest --backfill-events --state-dir state
+```
+
+启动本地接口与展示面板：
+
+```powershell
+.venv\Scripts\python -m ai_news_digest --serve-api --api-host 127.0.0.1 --api-port 8000
+```
+
+打开：
+
+```text
+http://127.0.0.1:8000/
+```
+
+## 本地接口
+
+- `GET /health`
+- `GET /events`
+- `GET /events/detail?event_id=<id>`
+- `GET /entities`
+- `GET /topics`
+- `GET /research/reports`
+- `GET /research/report?report_id=<id>`
+- `GET /research/run?query=<query>`
+
+## 仓库结构
+
+- `config/search_sources.json`：来源配置
+- `input/`：digest JSON 示例
+- `scripts/`：Windows 入口脚本与定时任务脚本
+- `src/ai_news_digest/`：核心实现
+- `templates/`：LaTeX 模板
+- `tests/`：自动化测试
+- `docs/IMPLEMENTATION_NOTES.md`：实现记录与已知限制
 
 ## 验证
 
@@ -102,24 +137,19 @@ python -m venv .venv
 .\scripts\run_digest.ps1 --input input\latest_digest.example.json --dry-run
 ```
 
-## 仓库结构
+## 适合展示的能力
 
-- `config/search_sources.json`：可信来源与域名范围
-- `input/`：结构化 digest JSON 示例
-- `scripts/run_digest.ps1`：Windows 启动入口
-- `src/ai_news_digest/`：核心代码
-- `templates/`：LaTeX 模板
-- `tests/`：自动化测试
+- 面向 AI 情报系统的工程化工作流设计
+- 结构化事件提取与持久化
+- 历史检索、实体跟踪、主题聚合
+- 研究模式与研究报告生成
+- 本地接口与展示面板
 
-## 适合展示给 AI agent / 软件开发岗位的点
+## 说明
 
-- 清晰的 agent workflow 设计与工具边界
-- 同时支持“日常自动化使用”和“可移植独立复现”的双模式
-- 提供可选的 `OPENAI_API_KEY` 驱动 API 路径，用于搜索发现与摘要生成
-- 用结构化中间表示连接搜索发现与文档渲染
-- 通过 LaTeX 生成可复用、可归档的正式 PDF 产物
-- 具备 SQLite 状态持久化与测试覆盖
+- 老的 SQLite 状态库在事件查询前可能需要先执行 `--backfill-events`
+- 实时 OpenAI 路径需要配置 `OPENAI_API_KEY`
 
-## 开源协议
+## License
 
 [MIT](./LICENSE)
