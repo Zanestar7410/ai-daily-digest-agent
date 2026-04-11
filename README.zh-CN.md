@@ -137,9 +137,9 @@ http://127.0.0.1:8000/
 .\scripts\run_digest.ps1 --input input\latest_digest.example.json --dry-run
 ```
 
-## 适合展示的能力
+## 实现亮点
 
-- 面向 AI 情报系统的工程化工作流设计
+- 基于受控来源的 AI 情报发现与整理
 - 结构化事件提取与持久化
 - 历史检索、实体跟踪、主题聚合
 - 研究模式与研究报告生成

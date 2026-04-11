@@ -156,13 +156,12 @@ http://127.0.0.1:8000/
 .\scripts\run_digest.ps1 --input input\latest_digest.example.json --dry-run
 ```
 
-## Role Highlights
+## Implementation Highlights
 
-- Agent-oriented workflow boundaries across discovery, events, research, and delivery
 - Source-governed AI intelligence collection instead of open-ended crawling
 - Structured event persistence with confidence and “why it matters” metadata
 - Historical retrieval across events, topics, entities, and research reports
-- Lightweight local API and dashboard for demos and product-style presentation
+- Lightweight local API and dashboard for interacting with stored intelligence
 - Research-mode report generation over persisted event data
 
 ## Notes
